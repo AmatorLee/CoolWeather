@@ -52,12 +52,14 @@ public class weatherDB {
         List<Province> list = new ArrayList<>();
         Cursor cursor = db.query("province",null,null,null,null,null,null);
         for (int i = 0; i <cursor.getCount() ; ++i){
+            cursor.moveToPosition(i);
             Province province = new Province();
             province.setId(cursor.getInt(cursor.getColumnIndex("id")));
             province.setProvinceCode(cursor.getString(cursor.getColumnIndex("province_code")));
             province.setProvinceName(cursor.getString(cursor.getColumnIndex("province_name")));
             list.add(province);
         }
+        if(cursor != null)
         cursor.close();
         return list;
     }
@@ -76,9 +78,10 @@ public class weatherDB {
     }
 
     public List<City> loadCity(int provinceId){
-        List<City> list = new ArrayList<City>() ;
-        Cursor cursor = db.query("city",null,"privince_id = ?",new String[]{String.valueOf(provinceId)},null,null,null);
+        List<City> list = new ArrayList<>() ;
+        Cursor cursor = db.query("city",null,"province_id = ?",new String[]{String.valueOf(provinceId)},null,null,null);
         for(int i = 0; i <cursor.getCount() ; ++i){
+            cursor.moveToPosition(i);
             City city = new City();
             city.setId(cursor.getInt(cursor.getColumnIndex("id")));
             city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
@@ -86,6 +89,7 @@ public class weatherDB {
             city.setProvinceId(provinceId);
             list.add(city);
         }
+        if(cursor != null)
         cursor.close();
         return list;
     }
@@ -106,6 +110,7 @@ public class weatherDB {
         List<County> list = new ArrayList<>();
         Cursor cursor = db.query("county",null,"city_id = ?",new String[]{String.valueOf(cityId)},null,null,null);
         for (int  i = 0 ; i <cursor.getCount() ; ++i){
+            cursor.moveToPosition(i);
             County county = new County();
             county.setId(cursor.getInt(cursor.getColumnIndex("id")));
             county.setCountyCode(cursor.getString(cursor.getColumnIndex("county_code")));
@@ -113,6 +118,7 @@ public class weatherDB {
             county.setCityId(cityId);
             list.add(county);
         }
+        if(cursor != null)
         cursor.close();
         return list;
     }

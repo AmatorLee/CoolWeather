@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * Created by DELL1 on 2016/7/30.
  */
-public class ChooseActivity extends Activity implements AdapterView.OnItemClickListener {
+public class ChooseActivity extends Activity {
 
     //选中等级
     private static final int LEVEL_PROVINCE = 0;
@@ -52,15 +52,19 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
 
     private Province select_Province;
     private City select_City;
-    private County select_County;
     //选中级别
     private  int CURRENTLEVEL;
+    //是否从ChooseActivity跳转
 
-    @Override
+    private boolean isFromShow;
+
+
+       @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+           isFromShow = getIntent().getBooleanExtra("from_show_activity",false);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sharedPreferences.getBoolean("city_selected",false)){
+        if (sharedPreferences.getBoolean("city_selected",false && !isFromShow)){
             Intent intent = new Intent(this,ShowActivity.class);
             startActivity(intent);
             finish();
@@ -76,28 +80,28 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
         listview = (ListView) findViewById(R.id.list_view);
         adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,dataLists);
         listview.setAdapter(adapter);
-        listview.setOnItemClickListener(this);
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (CURRENTLEVEL == LEVEL_PROVINCE) {
+                    select_Province = ProvinceList.get(position);
+                    queryCities();
+                }else if (CURRENTLEVEL == LEVEL_CITY){
+                    select_City = CityList.get(position);
+                    queryCounties();
+                }else if(CURRENTLEVEL == LEVEL_COUNTY){
+                    String countyCode = countyList.get(position).getCountyCode();
+                    Intent intent = new Intent(ChooseActivity.this,ShowActivity.class);
+                    intent.putExtra("county_code",countyCode);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        });
         queryProvinces();
     }
 
 
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (CURRENTLEVEL == LEVEL_PROVINCE) {
-            select_Province = ProvinceList.get(position);
-            queryCities();
-        }else if (CURRENTLEVEL == LEVEL_CITY){
-            select_City = CityList.get(position);
-            queryCounties();
-        }else if(CURRENTLEVEL == LEVEL_COUNTY){
-            String countyCode = countyList.get(position).getCountyCode();
-            Intent intent = new Intent(ChooseActivity.this,ShowActivity.class);
-            intent.putExtra("county_code",countyCode);
-            startActivity(intent);
-            finish();
-        }
-    }
 
     private void queryProvinces() {
         ProvinceList = weatherDB.loadProvince();
@@ -116,22 +120,6 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
     }
 
     private void queryCounties() {
-        CityList = weatherDB.loadCity(select_Province.getId());
-        if (CityList.size() >0){
-            dataLists.clear();
-            for (City city : CityList){
-                dataLists.add(city.getCityName());
-            }
-            adapter.notifyDataSetChanged();
-            listview.setSelection(0);
-            CURRENTLEVEL = LEVEL_COUNTY;
-            tvTitle.setText(select_Province.getProvinceName());
-        }else{
-            queryFrmoService(select_Province.getProvinceCode(),"city");
-        }
-    }
-
-    private void queryCities() {
         countyList = weatherDB.loadCounty(select_City.getId());
         if (countyList.size() >0){
             dataLists.clear();
@@ -140,10 +128,26 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
             }
             adapter.notifyDataSetChanged();
             listview.setSelection(0);
-            CURRENTLEVEL = LEVEL_CITY;
+            CURRENTLEVEL = LEVEL_COUNTY;
             tvTitle.setText(select_City.getCityName());
         }else{
             queryFrmoService(select_City.getCityCode(),"county");
+        }
+    }
+
+    private void queryCities() {
+        CityList = weatherDB.loadCity(select_Province.getId());
+        if (CityList.size() >0){
+            dataLists.clear();
+            for (City city : CityList){
+                dataLists.add(city.getCityName());
+            }
+            adapter.notifyDataSetChanged();
+            listview.setSelection(0);
+            CURRENTLEVEL = LEVEL_CITY;
+            tvTitle.setText(select_Province.getProvinceName());
+        }else{
+            queryFrmoService(select_Province.getProvinceCode(),"city");
         }
     }
     private void queryFrmoService(final String code , final String type){
@@ -201,17 +205,17 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
 
 
     private void closeProgressDialog() {
+        if (progressDialog != null){
+            progressDialog.dismiss();
+        }
+    }
+    private void showProgressDialog() {
         if (progressDialog == null){
             progressDialog = new ProgressDialog(ChooseActivity.this);
             progressDialog.setMessage("查询中");
             progressDialog.setCancelable(false);
         }
         progressDialog.show();
-    }
-    private void showProgressDialog() {
-        if (progressDialog != null){
-            progressDialog.dismiss();
-        }
     }
 
     /**
@@ -226,8 +230,12 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
         } else if (CURRENTLEVEL == LEVEL_CITY) {
             queryProvinces();
         } else {
-            finish();
+            if (isFromShow){
+                Intent intent = new Intent(this,ShowActivity.class);
+                startActivity(intent);
+            }
         }
+        finish();
     }
 
 

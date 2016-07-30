@@ -14,7 +14,7 @@ public class DBHelper extends SQLiteOpenHelper{
             ",province_code text)";
     private static final String CREATE_CITY = "create table city(" +
             "id integer primary key autoincrement , city_name text ," +
-            "city_code text ,privince_id integer)";
+            "city_code text ,province_id integer)";
     private static  final String CREATE_COUNTY = "create table county(" +
             "id integer primary key autoincrement,county_name text ," +
             "county_code text , city_id integer)";

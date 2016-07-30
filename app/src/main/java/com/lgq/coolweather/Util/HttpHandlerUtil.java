@@ -29,7 +29,7 @@ public class HttpHandlerUtil {
     public synchronized static boolean handlerProvince(weatherDB weatherDB , String response){
         if (!TextUtils.isEmpty(response)){
             String[] allprovinces = response.split(",");
-            if(allprovinces.length > 0 && allprovinces.toString() !=null){
+            if(allprovinces.length > 0 && allprovinces !=null){
                 for (String p : allprovinces){
                     String[] array = p.split("\\|");
                     Province province = new Province();
@@ -49,7 +49,7 @@ public class HttpHandlerUtil {
     public synchronized  static boolean handlerCity(weatherDB weatherDB ,String response,int provinceId){
         if (!TextUtils.isEmpty(response)){
             String[] allcities = response.split(",");
-            if (allcities.length > 0 && allcities.toString() != null){
+            if (allcities.length > 0 && allcities != null){
                 for (String c : allcities){
                     String[] array = c.split("\\|");
                     City city = new City();
@@ -70,7 +70,7 @@ public class HttpHandlerUtil {
     public synchronized  static boolean handlerCounty(weatherDB weatherDB ,String response,int cityId){
         if (!TextUtils.isEmpty(response)){
             String[] allcounties = response.split(",");
-            if (allcounties.length > 0 && allcounties.toString() != null){
+            if (allcounties.length > 0 && allcounties != null){
                 for (String c : allcounties){
                     String[] array = c.split("\\|");
                     County county = new County();
