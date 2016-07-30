@@ -2,7 +2,10 @@ package com.lqg.coolweather.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -56,6 +59,12 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sharedPreferences.getBoolean("city_selected",false)){
+            Intent intent = new Intent(this,ShowActivity.class);
+            startActivity(intent);
+            finish();
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.list_layout);
         initView();
@@ -81,12 +90,19 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
         }else if (CURRENTLEVEL == LEVEL_CITY){
             select_City = CityList.get(position);
             queryCounties();
+        }else if(CURRENTLEVEL == LEVEL_COUNTY){
+            String countyCode = countyList.get(position).getCountyCode();
+            Intent intent = new Intent(ChooseActivity.this,ShowActivity.class);
+            intent.putExtra("county_code",countyCode);
+            startActivity(intent);
+            finish();
         }
     }
 
     private void queryProvinces() {
         ProvinceList = weatherDB.loadProvince();
         if (ProvinceList.size() >0){
+            dataLists.clear();
             for (Province province :ProvinceList){
                 dataLists.add(province.getProvinceName());
             }
@@ -102,12 +118,13 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
     private void queryCounties() {
         CityList = weatherDB.loadCity(select_Province.getId());
         if (CityList.size() >0){
+            dataLists.clear();
             for (City city : CityList){
                 dataLists.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
             listview.setSelection(0);
-            CURRENTLEVEL = LEVEL_CITY;
+            CURRENTLEVEL = LEVEL_COUNTY;
             tvTitle.setText(select_Province.getProvinceName());
         }else{
             queryFrmoService(select_Province.getProvinceCode(),"city");
@@ -117,12 +134,13 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
     private void queryCities() {
         countyList = weatherDB.loadCounty(select_City.getId());
         if (countyList.size() >0){
+            dataLists.clear();
             for (County county : countyList){
                 dataLists.add(county.getCountyName());
             }
             adapter.notifyDataSetChanged();
             listview.setSelection(0);
-            CURRENTLEVEL = LEVEL_COUNTY;
+            CURRENTLEVEL = LEVEL_CITY;
             tvTitle.setText(select_City.getCityName());
         }else{
             queryFrmoService(select_City.getCityCode(),"county");
@@ -212,5 +230,5 @@ public class ChooseActivity extends Activity implements AdapterView.OnItemClickL
         }
     }
 
-    
+
 }
