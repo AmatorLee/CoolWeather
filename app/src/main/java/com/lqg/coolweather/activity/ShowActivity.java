@@ -16,6 +16,7 @@ import com.lgq.coolweather.Util.HttpHandlerUtil;
 import com.lgq.coolweather.Util.HttpListener;
 import com.lgq.coolweather.Util.HttpRequestUtil;
 import com.lqg.coolweather.R;
+import com.lqg.coolweather.update.AutoUpdateService;
 
 /**
  * Created by DELL1 on 2016/7/30.
@@ -109,6 +110,11 @@ public class ShowActivity extends Activity implements View.OnClickListener {
         weatherDespText.setText(sharedPreferences.getString("weather_desp",""));
         cityNameText.setVisibility(View.VISIBLE);
         weatherInfoLayout.setVisibility(View.VISIBLE);
+        /**
+        *开启自动更新服务
+        */
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     private void queryWeatherCode(String countyCode) {
